@@ -5,94 +5,6 @@
     "label": "Sheet 1"
   },
   {
-    "id": "38e29ce8.c71d64",
-    "type": "rpi-gpio in",
-    "name": "PIR on pin 7",
-    "pin": "7",
-    "intype": "down",
-    "read": true,
-    "x": 88.5,
-    "y": 417,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        
-      ]
-    ]
-  },
-  {
-    "id": "7a87919f.85787",
-    "type": "function",
-    "name": "Count",
-    "func": "context.count = context.count || 0;\ncontext.motionDetected = context.motionDetected || 0;\n\nif (msg.payload != context.motionDetected) {\n    context.motionDetected = msg.payload;\n    context.count = context.count + 1;\n    msg.payload = context.count;\n    return msg;\n} \n",
-    "outputs": 1,
-    "valid": true,
-    "x": 562,
-    "y": 502,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        
-      ]
-    ]
-  },
-  {
-    "id": "fe456545.01ba98",
-    "type": "e-mail",
-    "server": "smtp.gmail.com",
-    "port": "465",
-    "name": "nikhil.jacob.thomas@gmail.com",
-    "dname": "Nikhil Thomas",
-    "x": 733,
-    "y": 481,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      
-    ]
-  },
-  {
-    "id": "5b410ab6.a4bef4",
-    "type": "inject",
-    "name": "",
-    "topic": "",
-    "payload": "-t 1 -n -o -",
-    "payloadType": "none",
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "x": 109,
-    "y": 479,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        "3eb9f2c1.c1460e"
-      ]
-    ]
-  },
-  {
-    "id": "3eb9f2c1.c1460e",
-    "type": "exec",
-    "command": "\/opt\/vc\/bin\/raspistill",
-    "addpay": false,
-    "append": "-t 1 -n -w 1296 -h 720 -o \/run\/shm\/test.jpg",
-    "useSpawn": false,
-    "name": "",
-    "x": 390,
-    "y": 480,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        "58487237.a7b78c"
-      ],
-      [
-        
-      ],
-      [
-        
-      ]
-    ]
-  },
-  {
     "id": "f0c1d16a.0f3e3",
     "type": "debug",
     "name": "",
@@ -104,42 +16,6 @@
     "z": "d0d526aa.2f2ad8",
     "wires": [
       
-    ]
-  },
-  {
-    "id": "58487237.a7b78c",
-    "type": "function",
-    "name": "Attach pic",
-    "func": "msg.attachments = [ { path: \"\/run\/shm\/test.jpg\", filename: \"image.jpg\" } ];\nmsg.topic = \"pi\/7\";\nmsg.payload = \"Intruder alert\";\nreturn msg;",
-    "outputs": 1,
-    "valid": true,
-    "x": 579,
-    "y": 454,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        "fe456545.01ba98",
-        "b07f3812.4f80c8"
-      ]
-    ]
-  },
-  {
-    "id": "a0da169b.5f25e8",
-    "type": "function",
-    "name": "Split",
-    "func": "if (msg.payload == 1) {\n   return [ null, msg ];\n} else {\n   return [ msg, null ];\n}",
-    "outputs": "2",
-    "valid": true,
-    "x": 257,
-    "y": 418,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      [
-        
-      ],
-      [
-        "3eb9f2c1.c1460e"
-      ]
     ]
   },
   {
