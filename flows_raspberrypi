@@ -1,1 +1,378 @@
-[{"type":"tab","id":"d0d526aa.2f2ad8","label":"Sheet 1"},{"id":"38e29ce8.c71d64","type":"rpi-gpio in","name":"PIR on pin 7","pin":"7","intype":"down","read":true,"x":88.5,"y":417,"z":"d0d526aa.2f2ad8","wires":[[]]},{"id":"7a87919f.85787","type":"function","name":"Count","func":"context.count = context.count || 0;\ncontext.motionDetected = context.motionDetected || 0;\n\nif (msg.payload != context.motionDetected) {\n    context.motionDetected = msg.payload;\n    context.count = context.count + 1;\n    msg.payload = context.count;\n    return msg;\n} \n","outputs":1,"valid":true,"x":562,"y":502,"z":"d0d526aa.2f2ad8","wires":[[]]},{"id":"fe456545.01ba98","type":"e-mail","server":"smtp.gmail.com","port":"465","name":"nikhil.jacob.thomas@gmail.com","dname":"Nikhil Thomas","x":733,"y":481,"z":"d0d526aa.2f2ad8","wires":[]},{"id":"5b410ab6.a4bef4","type":"inject","name":"","topic":"","payload":"-t 1 -n -o -","payloadType":"none","repeat":"","crontab":"","once":false,"x":109,"y":479,"z":"d0d526aa.2f2ad8","wires":[["3eb9f2c1.c1460e"]]},{"id":"3eb9f2c1.c1460e","type":"exec","command":"/opt/vc/bin/raspistill","addpay":false,"append":"-t 1 -n -w 1296 -h 720 -o /run/shm/test.jpg","useSpawn":false,"name":"","x":390,"y":480,"z":"d0d526aa.2f2ad8","wires":[["58487237.a7b78c"],[],[]]},{"id":"f0c1d16a.0f3e3","type":"debug","name":"","active":true,"console":"false","complete":"true","x":699,"y":111,"z":"d0d526aa.2f2ad8","wires":[]},{"id":"58487237.a7b78c","type":"function","name":"Attach pic","func":"msg.attachments = [ { path: \"/run/shm/test.jpg\", filename: \"image.jpg\" } ];\nmsg.topic = \"pi/7\";\nmsg.payload = \"Intruder alert\";\nreturn msg;","outputs":1,"valid":true,"x":579,"y":454,"z":"d0d526aa.2f2ad8","wires":[["fe456545.01ba98","b07f3812.4f80c8"]]},{"id":"a0da169b.5f25e8","type":"function","name":"Split","func":"if (msg.payload == 1) {\n   return [ null, msg ];\n} else {\n   return [ msg, null ];\n}","outputs":"2","valid":true,"x":257,"y":418,"z":"d0d526aa.2f2ad8","wires":[[],["3eb9f2c1.c1460e"]]},{"id":"b8622b8b.479dd8","type":"bmp085","device":"/dev/i2c-1","timer":"900","pressureUnits":"inHg","temperatureUnits":"degF","seaLevel":"QFE","height":0,"heightUnits":"m","name":"","x":60,"y":82,"z":"d0d526aa.2f2ad8","wires":[["2a881c2f.d577e4","abe24e18.541db"]]},{"id":"74e4d988.8b1b28","type":"http request","name":"send to sparkfun","method":"GET","ret":"txt","url":"","x":687,"y":27,"z":"d0d526aa.2f2ad8","wires":[[]]},{"id":"b26066b3.4d9f98","type":"function","name":"Sparkfun payload","func":"msg.url = 'http://data.sparkfun.com/input/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction;\nreturn msg;","outputs":1,"valid":true,"x":468,"y":84,"z":"d0d526aa.2f2ad8","wires":[["74e4d988.8b1b28","f0c1d16a.0f3e3"]]},{"id":"c623a9d1.39dc58","type":"htu21d","device":"/dev/i2c-1","updateInterval":"900","dewpointUnits":"degF","temperatureUnits":"degF","name":"","x":69,"y":30,"z":"d0d526aa.2f2ad8","wires":[["dd954cc4.226ab"]]},{"id":"dd954cc4.226ab","type":"function","name":"Copy Humidity","func":"context.global.humidity = msg.payload.humidity;\ncontext.global.dewpoint = msg.payload.dewpoint;\ncontext.global.temperature = msg.payload.temperature;","outputs":1,"valid":true,"x":410,"y":31,"z":"d0d526aa.2f2ad8","wires":[[]]},{"id":"2a881c2f.d577e4","type":"delay","name":"","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"x":238,"y":76,"z":"d0d526aa.2f2ad8","wires":[["b26066b3.4d9f98"]]},{"id":"b07f3812.4f80c8","type":"debug","name":"","active":true,"console":"false","complete":"true","x":731,"y":436,"z":"d0d526aa.2f2ad8","wires":[]},{"id":"abe24e18.541db","type":"function","name":"","func":"var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nvar c = 1;\nwhile (c <= 4) {\ncurrent = context.global.pressureReadings[c];\nprevious = context.global.pressureReadings[c-1];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.message = msg.message + \"/\" + \"Pressure has not changed.\";\n} else if (delta < 0) {\n    if((-delta) < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"/\" + \"Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"/\" + \"Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"/This means that poor weather will happen soon.\"\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"/\" + \"Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"/\" + \"Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\n}\nmsg.debug = context.global.countingDrastic + \"/\" +context.global.countingSlight + \"/\" +context.global.countingRise;\nmsg.payload = \"[\" + msg.message + \"]\" + \"//\" + \"[\" + context.global.prediction + \"]\";\nreturn msg;","outputs":1,"valid":true,"x":440,"y":261,"z":"d0d526aa.2f2ad8","wires":[["e85edb4b.17a128"]]},{"id":"e85edb4b.17a128","type":"debug","name":"","active":true,"console":"false","complete":"payload","x":744,"y":265,"z":"d0d526aa.2f2ad8","wires":[]},{"id":"60dca6c1.9f2358","type":"debug","name":"","active":true,"console":"false","complete":"debug","x":823,"y":322,"z":"d0d526aa.2f2ad8","wires":[]},{"id":"8f618a96.709e78","type":"http request","name":"send adafruit io","method":"GET","ret":"txt","url":"","x":651,"y":155,"z":"d0d526aa.2f2ad8","wires":[[]]},{"id":"3ba75988.c458a6","type":"function","name":"","func":"msg.headers = {\n  \"Content-type\" : \"application/json\",\n  \"X-AIO-KEY\": \"ea55050457ec81bd909cc8ba0da13da20cda98fb\"\n};\nmsg.method = \"POST\";\nmsg.payload = \"{\\\"value\\\":\\\"12\\\"}\";\nmsg.url = 'io.adafruit.com/api/feeds/2139/data';\nreturn msg;","outputs":1,"valid":true,"x":464,"y":154,"z":"d0d526aa.2f2ad8","wires":[["8f618a96.709e78","c8c15cfe.373ea"]]},{"id":"733486f5.8ccb78","type":"inject","name":"","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"x":112,"y":176,"z":"d0d526aa.2f2ad8","wires":[["3ba75988.c458a6"]]},{"id":"c8c15cfe.373ea","type":"debug","name":"","active":true,"console":"false","complete":"true","x":672,"y":204,"z":"d0d526aa.2f2ad8","wires":[]}]
+[
+  {
+    "type": "tab",
+    "id": "d0d526aa.2f2ad8",
+    "label": "Sheet 1"
+  },
+  {
+    "id": "38e29ce8.c71d64",
+    "type": "rpi-gpio in",
+    "name": "PIR on pin 7",
+    "pin": "7",
+    "intype": "down",
+    "read": true,
+    "x": 88.5,
+    "y": 417,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "7a87919f.85787",
+    "type": "function",
+    "name": "Count",
+    "func": "context.count = context.count || 0;\ncontext.motionDetected = context.motionDetected || 0;\n\nif (msg.payload != context.motionDetected) {\n    context.motionDetected = msg.payload;\n    context.count = context.count + 1;\n    msg.payload = context.count;\n    return msg;\n} \n",
+    "outputs": 1,
+    "valid": true,
+    "x": 562,
+    "y": 502,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "fe456545.01ba98",
+    "type": "e-mail",
+    "server": "smtp.gmail.com",
+    "port": "465",
+    "name": "nikhil.jacob.thomas@gmail.com",
+    "dname": "Nikhil Thomas",
+    "x": 733,
+    "y": 481,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "5b410ab6.a4bef4",
+    "type": "inject",
+    "name": "",
+    "topic": "",
+    "payload": "-t 1 -n -o -",
+    "payloadType": "none",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 109,
+    "y": 479,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "3eb9f2c1.c1460e"
+      ]
+    ]
+  },
+  {
+    "id": "3eb9f2c1.c1460e",
+    "type": "exec",
+    "command": "\/opt\/vc\/bin\/raspistill",
+    "addpay": false,
+    "append": "-t 1 -n -w 1296 -h 720 -o \/run\/shm\/test.jpg",
+    "useSpawn": false,
+    "name": "",
+    "x": 390,
+    "y": 480,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "58487237.a7b78c"
+      ],
+      [
+        
+      ],
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "f0c1d16a.0f3e3",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 699,
+    "y": 111,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "58487237.a7b78c",
+    "type": "function",
+    "name": "Attach pic",
+    "func": "msg.attachments = [ { path: \"\/run\/shm\/test.jpg\", filename: \"image.jpg\" } ];\nmsg.topic = \"pi\/7\";\nmsg.payload = \"Intruder alert\";\nreturn msg;",
+    "outputs": 1,
+    "valid": true,
+    "x": 579,
+    "y": 454,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "fe456545.01ba98",
+        "b07f3812.4f80c8"
+      ]
+    ]
+  },
+  {
+    "id": "a0da169b.5f25e8",
+    "type": "function",
+    "name": "Split",
+    "func": "if (msg.payload == 1) {\n   return [ null, msg ];\n} else {\n   return [ msg, null ];\n}",
+    "outputs": "2",
+    "valid": true,
+    "x": 257,
+    "y": 418,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ],
+      [
+        "3eb9f2c1.c1460e"
+      ]
+    ]
+  },
+  {
+    "id": "b8622b8b.479dd8",
+    "type": "bmp085",
+    "device": "\/dev\/i2c-1",
+    "timer": "900",
+    "pressureUnits": "inHg",
+    "temperatureUnits": "degF",
+    "seaLevel": "QFE",
+    "height": 0,
+    "heightUnits": "m",
+    "name": "",
+    "x": 60,
+    "y": 82,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "2a881c2f.d577e4",
+        "abe24e18.541db"
+      ]
+    ]
+  },
+  {
+    "id": "74e4d988.8b1b28",
+    "type": "http request",
+    "name": "send to sparkfun",
+    "method": "GET",
+    "ret": "txt",
+    "url": "",
+    "x": 687,
+    "y": 27,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "b26066b3.4d9f98",
+    "type": "function",
+    "name": "Sparkfun payload",
+    "func": "msg.url = 'http:\/\/data.sparkfun.com\/input\/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction;\nreturn msg;",
+    "outputs": 1,
+    "valid": true,
+    "x": 468,
+    "y": 84,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "74e4d988.8b1b28",
+        "f0c1d16a.0f3e3"
+      ]
+    ]
+  },
+  {
+    "id": "c623a9d1.39dc58",
+    "type": "htu21d",
+    "device": "\/dev\/i2c-1",
+    "updateInterval": "900",
+    "dewpointUnits": "degF",
+    "temperatureUnits": "degF",
+    "name": "",
+    "x": 69,
+    "y": 30,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "dd954cc4.226ab"
+      ]
+    ]
+  },
+  {
+    "id": "dd954cc4.226ab",
+    "type": "function",
+    "name": "Copy Humidity",
+    "func": "context.global.humidity = msg.payload.humidity;\ncontext.global.dewpoint = msg.payload.dewpoint;\ncontext.global.temperature = msg.payload.temperature;",
+    "outputs": 1,
+    "valid": true,
+    "x": 410,
+    "y": 31,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "2a881c2f.d577e4",
+    "type": "delay",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "x": 238,
+    "y": 76,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "b26066b3.4d9f98"
+      ]
+    ]
+  },
+  {
+    "id": "b07f3812.4f80c8",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 731,
+    "y": 436,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "abe24e18.541db",
+    "type": "function",
+    "name": "",
+    "func": "var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nvar c = 1;\nwhile (c <= 4) {\ncurrent = context.global.pressureReadings[c];\nprevious = context.global.pressureReadings[c-1];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.message = msg.message + \"\/\" + \"Pressure has not changed.\";\n} else if (delta < 0) {\n    if((-delta) < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"\/This means that poor weather will happen soon.\"\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\n}\nmsg.debug = context.global.countingDrastic + \"\/\" +context.global.countingSlight + \"\/\" +context.global.countingRise;\nmsg.payload = \"[\" + msg.message + \"]\" + \"\/\/\" + \"[\" + context.global.prediction + \"]\";\nreturn msg;",
+    "outputs": 1,
+    "valid": true,
+    "x": 440,
+    "y": 261,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "e85edb4b.17a128"
+      ]
+    ]
+  },
+  {
+    "id": "e85edb4b.17a128",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "payload",
+    "x": 744,
+    "y": 265,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "60dca6c1.9f2358",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "debug",
+    "x": 823,
+    "y": 322,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "8f618a96.709e78",
+    "type": "http request",
+    "name": "send adafruit io",
+    "method": "GET",
+    "ret": "txt",
+    "url": "",
+    "x": 651,
+    "y": 155,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "3ba75988.c458a6",
+    "type": "function",
+    "name": "",
+    "func": "msg.headers = {\n  \"Content-type\" : \"application\/json\",\n  \"X-AIO-KEY\": \"ea55050457ec81bd909cc8ba0da13da20cda98fb\"\n};\nmsg.method = \"POST\";\nmsg.payload = \"{\\\"value\\\":\\\"12\\\"}\";\nmsg.url = 'io.adafruit.com\/api\/feeds\/2139\/data';\nreturn msg;",
+    "outputs": 1,
+    "valid": true,
+    "x": 464,
+    "y": 154,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "8f618a96.709e78",
+        "c8c15cfe.373ea"
+      ]
+    ]
+  },
+  {
+    "id": "733486f5.8ccb78",
+    "type": "inject",
+    "name": "",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 112,
+    "y": 176,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "3ba75988.c458a6"
+      ]
+    ]
+  },
+  {
+    "id": "c8c15cfe.373ea",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 672,
+    "y": 204,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  }
+]
