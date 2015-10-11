@@ -1,0 +1,82 @@
+[
+  {
+    "id": "733486f5.8ccb78",
+    "type": "inject",
+    "name": "",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 112,
+    "y": 176,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "3ba75988.c458a6"
+      ]
+    ]
+  },
+  {
+    "id": "3ba75988.c458a6",
+    "type": "function",
+    "name": "",
+    "func": "msg.headers = {\n  \"Content-type\" : \"application\/json\",\n  \"X-AIO-KEY\": \"ea55050457ec81bd909cc8ba0da13da20cda98fb\"\n};\nmsg.method = \"POST\";\nmsg.payload = \"{\\\"value\\\":\\\"12\\\"}\";\nmsg.url = 'io.adafruit.com\/api\/feeds\/2139\/data';\nreturn msg;",
+    "outputs": 1,
+    "valid": true,
+    "x": 464,
+    "y": 154,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        "8f618a96.709e78",
+        "c8c15cfe.373ea"
+      ]
+    ]
+  },
+  {
+    "id": "8f618a96.709e78",
+    "type": "http request",
+    "name": "send adafruit io",
+    "method": "GET",
+    "ret": "txt",
+    "url": "",
+    "x": 651,
+    "y": 155,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      [
+        
+      ]
+    ]
+  },
+  {
+    "id": "c8c15cfe.373ea",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 672,
+    "y": 204,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  },
+  {
+    "id": "60dca6c1.9f2358",
+    "type": "debug",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "debug",
+    "x": 823,
+    "y": 322,
+    "z": "d0d526aa.2f2ad8",
+    "wires": [
+      
+    ]
+  }
+]
