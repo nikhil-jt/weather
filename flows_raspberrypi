@@ -1,11 +1,6 @@
 [
   {
-    "type": "tab",
-    "id": "d0d526aa.2f2ad8",
-    "label": "Sheet 1"
-  },
-  {
-    "id": "f0c1d16a.0f3e3",
+    "id": "193e1c49.e6c1e4",
     "type": "debug",
     "name": "",
     "active": true,
@@ -13,16 +8,16 @@
     "complete": "true",
     "x": 699,
     "y": 111,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       
     ]
   },
   {
-    "id": "b8622b8b.479dd8",
+    "id": "11a0c819.ee5f38",
     "type": "bmp085",
     "device": "\/dev\/i2c-1",
-    "timer": "900",
+    "timer": "2",
     "pressureUnits": "inHg",
     "temperatureUnits": "degF",
     "seaLevel": "QFE",
@@ -31,16 +26,15 @@
     "name": "",
     "x": 60,
     "y": 82,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
-        "2a881c2f.d577e4",
-        "abe24e18.541db"
+        "670f2980.98f0d8"
       ]
     ]
   },
   {
-    "id": "74e4d988.8b1b28",
+    "id": "59b23235.a64dcc",
     "type": "http request",
     "name": "send to sparkfun",
     "method": "GET",
@@ -48,7 +42,7 @@
     "url": "",
     "x": 687,
     "y": 27,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
         
@@ -56,24 +50,24 @@
     ]
   },
   {
-    "id": "b26066b3.4d9f98",
+    "id": "3b55d89d.c4aa28",
     "type": "function",
     "name": "Sparkfun payload",
-    "func": "msg.url = 'http:\/\/data.sparkfun.com\/input\/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction;\nreturn msg;",
+    "func": "msg.url = 'http:\/\/data.sparkfun.com\/input\/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction + \"&delta=\" + context.global.delta;\nreturn msg;",
     "outputs": 1,
     "valid": true,
     "x": 468,
     "y": 84,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
-        "74e4d988.8b1b28",
-        "f0c1d16a.0f3e3"
+        "59b23235.a64dcc",
+        "193e1c49.e6c1e4"
       ]
     ]
   },
   {
-    "id": "c623a9d1.39dc58",
+    "id": "d53344b7.2accb8",
     "type": "htu21d",
     "device": "\/dev\/i2c-1",
     "updateInterval": "900",
@@ -82,15 +76,15 @@
     "name": "",
     "x": 69,
     "y": 30,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
-        "dd954cc4.226ab"
+        "9e3c9940.61c368"
       ]
     ]
   },
   {
-    "id": "dd954cc4.226ab",
+    "id": "9e3c9940.61c368",
     "type": "function",
     "name": "Copy Humidity",
     "func": "context.global.humidity = msg.payload.humidity;\ncontext.global.dewpoint = msg.payload.dewpoint;\ncontext.global.temperature = msg.payload.temperature;",
@@ -98,7 +92,7 @@
     "valid": true,
     "x": 410,
     "y": 31,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
         
@@ -106,7 +100,7 @@
     ]
   },
   {
-    "id": "2a881c2f.d577e4",
+    "id": "a06f0203.5f91",
     "type": "delay",
     "name": "",
     "pauseType": "delay",
@@ -120,53 +114,39 @@
     "drop": false,
     "x": 238,
     "y": 76,
-    "z": "d0d526aa.2f2ad8",
+    "z": "fabf3575.0540c8",
     "wires": [
       [
-        "b26066b3.4d9f98"
+        "3b55d89d.c4aa28"
       ]
     ]
   },
   {
-    "id": "b07f3812.4f80c8",
-    "type": "debug",
-    "name": "",
-    "active": true,
-    "console": "false",
-    "complete": "true",
-    "x": 731,
-    "y": 436,
-    "z": "d0d526aa.2f2ad8",
-    "wires": [
-      
-    ]
-  },
-  {
-    "id": "abe24e18.541db",
+    "id": "670f2980.98f0d8",
     "type": "function",
     "name": "",
-    "func": "var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nvar c = 1;\nwhile (c <= 4) {\ncurrent = context.global.pressureReadings[c];\nprevious = context.global.pressureReadings[c-1];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.message = msg.message + \"\/\" + \"Pressure has not changed.\";\n} else if (delta < 0) {\n    if((-delta) < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"\/This means that poor weather will happen soon.\"\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.message = msg.message + \"\/\" + \"Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\n}\nmsg.debug = context.global.countingDrastic + \"\/\" +context.global.countingSlight + \"\/\" +context.global.countingRise;\nmsg.payload = \"[\" + msg.message + \"]\" + \"\/\/\" + \"[\" + context.global.prediction + \"]\";\nreturn msg;",
+    "func": "var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nmsg.payload = \"\/\";\ncontext.global.prediction = \"The prediction is:\";\ncurrent = context.global.pressureReadings[3];\nprevious = context.global.pressureReadings[2];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.payload = msg.payload + \"\/Pressure has not changed.\";\n} else if (delta < 0) {\n    if(absDelta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"\/Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"\/Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"\/This means that poor weather will happen soon.\";\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"\/Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"\/Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\nmsg.debug = context.global.countingDrastic + \"\/\" +context.global.countingSlight + \"\/\" +context.global.countingRise;\ncontext.global.delta = msg.payload;\nif(context.global.prediction === \"The prediction is:\") {\n    context.global.prediction = \"There is not enough data for prediction.\";\n}\nreturn msg;",
     "outputs": 1,
     "valid": true,
-    "x": 440,
-    "y": 261,
-    "z": "d0d526aa.2f2ad8",
+    "x": 196,
+    "y": 220,
+    "z": "fabf3575.0540c8",
     "wires": [
       [
-        "e85edb4b.17a128"
+        "82b2804b.7d4d8"
       ]
     ]
   },
   {
-    "id": "e85edb4b.17a128",
+    "id": "82b2804b.7d4d8",
     "type": "debug",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "payload",
-    "x": 744,
-    "y": 265,
-    "z": "d0d526aa.2f2ad8",
+    "x": 422,
+    "y": 259,
+    "z": "fabf3575.0540c8",
     "wires": [
       
     ]
