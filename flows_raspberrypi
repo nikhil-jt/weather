@@ -1,154 +1,155 @@
 [
-  {
-    "id": "193e1c49.e6c1e4",
-    "type": "debug",
-    "name": "",
-    "active": true,
-    "console": "false",
-    "complete": "true",
-    "x": 699,
-    "y": 111,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      
-    ]
-  },
-  {
-    "id": "11a0c819.ee5f38",
-    "type": "bmp085",
-    "device": "\/dev\/i2c-1",
-    "timer": "2",
-    "pressureUnits": "inHg",
-    "temperatureUnits": "degF",
-    "seaLevel": "QFE",
-    "height": 0,
-    "heightUnits": "m",
-    "name": "",
-    "x": 60,
-    "y": 82,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        "670f2980.98f0d8"
+   {
+      "id":"32265d72.cdd9a2",
+      "type":"debug",
+      "name":"",
+      "active":true,
+      "console":"false",
+      "complete":"true",
+      "x":696,
+      "y":162,
+      "z":"de52e22f.21ad2",
+      "wires":[
+
       ]
-    ]
-  },
-  {
-    "id": "59b23235.a64dcc",
-    "type": "http request",
-    "name": "send to sparkfun",
-    "method": "GET",
-    "ret": "txt",
-    "url": "",
-    "x": 687,
-    "y": 27,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        
+   },
+   {
+      "id":"2d7ef359.d2810c",
+      "type":"bmp085",
+      "device":"/dev/i2c-1",
+      "timer":"900",
+      "pressureUnits":"inHg",
+      "temperatureUnits":"degF",
+      "seaLevel":"QFE",
+      "height":0,
+      "heightUnits":"m",
+      "name":"",
+      "x":57,
+      "y":133,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+            "a0888db0.5f777",
+            "43d55f0d.bc2aa"
+         ]
       ]
-    ]
-  },
-  {
-    "id": "3b55d89d.c4aa28",
-    "type": "function",
-    "name": "Sparkfun payload",
-    "func": "msg.url = 'http:\/\/data.sparkfun.com\/input\/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction + \"&delta=\" + context.global.delta;\nreturn msg;",
-    "outputs": 1,
-    "valid": true,
-    "x": 468,
-    "y": 84,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        "59b23235.a64dcc",
-        "193e1c49.e6c1e4"
+   },
+   {
+      "id":"df01437.f20fec",
+      "type":"http request",
+      "name":"send to sparkfun",
+      "method":"GET",
+      "ret":"txt",
+      "url":"",
+      "x":684,
+      "y":78,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+
+         ]
       ]
-    ]
-  },
-  {
-    "id": "d53344b7.2accb8",
-    "type": "htu21d",
-    "device": "\/dev\/i2c-1",
-    "updateInterval": "900",
-    "dewpointUnits": "degF",
-    "temperatureUnits": "degF",
-    "name": "",
-    "x": 69,
-    "y": 30,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        "9e3c9940.61c368"
+   },
+   {
+      "id":"a9a4c3d5.565b4",
+      "type":"function",
+      "name":"Sparkfun payload",
+      "func":"msg.url = 'http://data.sparkfun.com/input/yAbOm8q5jdsynJnO8O02?private_key=4WRrZ9NDbEtKvGvj1jDa&temp=' + msg.payload.temperature + '&pressure=' + msg.payload.pressure + '&humidity=' + context.global.humidity + '&dewpoint=' + context.global.dewpoint + '&temp2=' + context.global.temperature + '&expected_weather=' + context.global.prediction + \"&delta=\" + context.global.delta;\nreturn msg;",
+      "outputs":1,
+      "valid":true,
+      "x":465,
+      "y":135,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+            "df01437.f20fec",
+            "32265d72.cdd9a2"
+         ]
       ]
-    ]
-  },
-  {
-    "id": "9e3c9940.61c368",
-    "type": "function",
-    "name": "Copy Humidity",
-    "func": "context.global.humidity = msg.payload.humidity;\ncontext.global.dewpoint = msg.payload.dewpoint;\ncontext.global.temperature = msg.payload.temperature;",
-    "outputs": 1,
-    "valid": true,
-    "x": 410,
-    "y": 31,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        
+   },
+   {
+      "id":"c04d2dc4.3fb2d",
+      "type":"htu21d",
+      "device":"/dev/i2c-1",
+      "updateInterval":"900",
+      "dewpointUnits":"degF",
+      "temperatureUnits":"degF",
+      "name":"",
+      "x":66,
+      "y":81,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+            "ddc173dc.223e9"
+         ]
       ]
-    ]
-  },
-  {
-    "id": "a06f0203.5f91",
-    "type": "delay",
-    "name": "",
-    "pauseType": "delay",
-    "timeout": "5",
-    "timeoutUnits": "seconds",
-    "rate": "1",
-    "rateUnits": "second",
-    "randomFirst": "1",
-    "randomLast": "5",
-    "randomUnits": "seconds",
-    "drop": false,
-    "x": 238,
-    "y": 76,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        "3b55d89d.c4aa28"
+   },
+   {
+      "id":"ddc173dc.223e9",
+      "type":"function",
+      "name":"Copy Humidity",
+      "func":"context.global.humidity = msg.payload.humidity;\ncontext.global.dewpoint = msg.payload.dewpoint;\ncontext.global.temperature = msg.payload.temperature;",
+      "outputs":1,
+      "valid":true,
+      "x":407,
+      "y":82,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+
+         ]
       ]
-    ]
-  },
-  {
-    "id": "670f2980.98f0d8",
-    "type": "function",
-    "name": "",
-    "func": "var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nmsg.payload = \"\/\";\ncontext.global.prediction = \"The prediction is:\";\ncurrent = context.global.pressureReadings[3];\nprevious = context.global.pressureReadings[2];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.payload = msg.payload + \"\/Pressure has not changed.\";\n} else if (delta < 0) {\n    if(absDelta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"\/Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"\/Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"\/This means that poor weather will happen soon.\";\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"\/Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"\/Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"\/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\nmsg.debug = context.global.countingDrastic + \"\/\" +context.global.countingSlight + \"\/\" +context.global.countingRise;\ncontext.global.delta = msg.payload;\nif(context.global.prediction === \"The prediction is:\") {\n    context.global.prediction = \"There is not enough data for prediction.\";\n}\nreturn msg;",
-    "outputs": 1,
-    "valid": true,
-    "x": 196,
-    "y": 220,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      [
-        "82b2804b.7d4d8"
+   },
+   {
+      "id":"43d55f0d.bc2aa",
+      "type":"delay",
+      "name":"",
+      "pauseType":"delay",
+      "timeout":"5",
+      "timeoutUnits":"seconds",
+      "rate":"1",
+      "rateUnits":"second",
+      "randomFirst":"1",
+      "randomLast":"5",
+      "randomUnits":"seconds",
+      "drop":false,
+      "x":235,
+      "y":127,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+            "a9a4c3d5.565b4"
+         ]
       ]
-    ]
-  },
-  {
-    "id": "82b2804b.7d4d8",
-    "type": "debug",
-    "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "payload",
-    "x": 422,
-    "y": 259,
-    "z": "fabf3575.0540c8",
-    "wires": [
-      
-    ]
-  }
+   },
+   {
+      "id":"a0888db0.5f777",
+      "type":"function",
+      "name":"",
+      "func":"var currentPressure = msg.payload.pressure;\nif (context.global.pressureReadings === undefined) {\n  context.global.pressureReadings = [0, currentPressure, currentPressure, currentPressure];\n}\ncontext.global.pressureReadings.push(msg.payload.pressure);\ncontext.global.pressureReadings.splice(0,1);\nvar current,previous;\ncontext.global.countingDrastic;\ncontext.global.countingSlight;\ncontext.global.countingRise;\nmsg.payload = \"/\";\ncontext.global.prediction = \"The prediction is:\";\ncurrent = context.global.pressureReadings[3];\nprevious = context.global.pressureReadings[2];\nvar delta = current - previous;\nvar absDelta = delta;\nif(delta < 0) {\n    absDelta = -delta;\n}\nif (absDelta < 0.0001) {\n    msg.payload = msg.payload + \"/Pressure has not changed.\";\n} else if (delta < 0) {\n    if(absDelta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight++;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"/Pressure has gone slightly lower during readings. It went down by \" + (-delta) + \".\";\n    }\n    else {\n        context.global.countingDrastic++;\n        context.global.countingSlight = 0;\n        context.global.countingRise = 0;\n        msg.payload = msg.payload + \"/Pressure has gone drastically lower during readings. It went down by \" + (-delta) + \".\";\n        context.global.prediction = context.global.prediction + \"/This means that poor weather will happen soon.\";\n    }\n} else if (delta > 0) {\n    if (delta < 0.02) {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"/Pressure has gone slightly higher during readings. It went up by \" + delta + \".\";\n    } else {\n        context.global.countingDrastic = 0;\n        context.global.countingSlight = 0;\n        context.global.countingRise++;\n        msg.payload = msg.payload + \"/Pressure has gone drastically higher during readings. It went up by \" + delta + \".\";\n    }\n}\nif(context.global.countingDrastic >= 4) {\n    context.global.countingDrastic = 0;\n    context.global.prediction = context.global.prediction + \"/There is a rapid fall in the air pressure, and a storm with wind and precipitation should be expected within 5 to 6 hours.\";\n} else if(context.global.countingSlight >= 4) {\n    context.global.countingSlight = 0;\n    context.global.prediction = context.global.prediction + \"/There is a slow,moderate fall in the air pressure, and an extended period of poor weather will happen, with precipitation likely.\";\n}\nelse if(context.global.countingRise >= 4) {\n    context.global.countingRise = 0;\n    context.global.prediction = context.global.prediction + \"/There is a rise of air pressure, and fair and dry weather should be expected, with precipitation unlikely.\";\n}\nmsg.debug = context.global.countingDrastic + \"/\" +context.global.countingSlight + \"/\" +context.global.countingRise;\ncontext.global.delta = msg.payload;\nif(context.global.prediction === \"The prediction is:\") {\n    context.global.prediction = \"There is not enough data for prediction.\";\n}\nreturn msg;",
+      "outputs":1,
+      "valid":true,
+      "x":193,
+      "y":271,
+      "z":"de52e22f.21ad2",
+      "wires":[
+         [
+            "3d1952ce.c2e6ae"
+         ]
+      ]
+   },
+   {
+      "id":"3d1952ce.c2e6ae",
+      "type":"debug",
+      "name":"",
+      "active":false,
+      "console":"false",
+      "complete":"payload",
+      "x":419,
+      "y":310,
+      "z":"de52e22f.21ad2",
+      "wires":[
+
+      ]
+   }
 ]
